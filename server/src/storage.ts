@@ -123,7 +123,7 @@ export const bucket = {
   
   file(fileName: string) {
     return {
-      async getSignedUrl(options: { action: string; expires: number }) {
+      async getSignedUrl(options: { action: 'read' | 'write'; expires: number }) {
         const now = new Date();
         const datetime = now.toISOString().replace(/[:\-]|\.\d{3}/g, '');
         const date = datetime.substring(0, 8);
@@ -133,8 +133,9 @@ export const bucket = {
         const service = 'storage';
         const credentialScope = `${date}/${region}/${service}/goog4_request`;
         
-        const method = 'GET';
-        const uri = `/${fileName}`;
+        const method = options.action === 'write' ? 'PUT' : 'GET';
+        const encodedFileName = fileName.split('/').map(part => encodeURIComponent(part)).join('/');
+        const uri = `/${encodedFileName}`;
         const host = `${bucketName}.storage.googleapis.com`;
         
         const queryParams = [
@@ -161,7 +162,7 @@ export const bucket = {
         const signingKey = getSigningKey(secret, date, region, service);
         const signature = crypto.createHmac('sha256', signingKey).update(stringToSign).digest('hex');
         
-        const signedUrl = `https://${host}${encodeURI(uri)}?${queryString}&X-Goog-Signature=${signature}`;
+        const signedUrl = `https://${host}${uri}?${queryString}&X-Goog-Signature=${signature}`;
         
         return [signedUrl];
       }

@@ -4,6 +4,7 @@ import { useFileExplorer } from './hooks/useFileExplorer';
 import { Breadcrumbs } from './components/Breadcrumbs';
 import { Toolbar } from './components/Toolbar';
 import { FileList } from './components/FileList';
+import { UploadDialog } from './components/UploadDialog';
 
 const FileExplorer: React.FC<FileExplorerProps> = () => {
   const {
@@ -14,8 +15,11 @@ const FileExplorer: React.FC<FileExplorerProps> = () => {
     navigateToFolder,
     navigateUp,
     navigateToBreadcrumb,
-    openFile
+    openFile,
+    refresh
   } = useFileExplorer();
+
+  const [showUpload, setShowUpload] = React.useState(false);
 
   if (error) return <div style={{ padding: '1rem', color: 'red' }}>Error loading directory</div>;
   if (isLoading || !data) return <div style={{ padding: '1rem' }}>Loading...</div>;
@@ -29,7 +33,8 @@ const FileExplorer: React.FC<FileExplorerProps> = () => {
       
       <Toolbar 
         currentPath={currentPath} 
-        onNavigateUp={navigateUp} 
+        onNavigateUp={navigateUp}
+        onOpenUploadDialog={() => setShowUpload(true)}
       />
 
       <FileList 
@@ -37,6 +42,16 @@ const FileExplorer: React.FC<FileExplorerProps> = () => {
         currentPath={currentPath}
         onNavigateToFolder={navigateToFolder}
         onOpenFile={openFile}
+      />
+
+      <UploadDialog
+        isOpen={showUpload}
+        currentPath={currentPath}
+        onClose={() => setShowUpload(false)}
+        onUploaded={() => {
+          setShowUpload(false);
+          refresh();
+        }}
       />
     </div>
   );

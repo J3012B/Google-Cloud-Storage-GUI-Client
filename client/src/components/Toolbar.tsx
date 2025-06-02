@@ -3,9 +3,10 @@ import React from 'react';
 interface ToolbarProps {
   currentPath: string;
   onNavigateUp: () => void;
+  onOpenUploadDialog: () => void;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ currentPath, onNavigateUp }) => {
+const Toolbar: React.FC<ToolbarProps> = ({ currentPath, onNavigateUp, onOpenUploadDialog }) => {
   return (
     <div style={{ 
       padding: '8px 16px', 
@@ -29,6 +30,21 @@ const Toolbar: React.FC<ToolbarProps> = ({ currentPath, onNavigateUp }) => {
         }}
       >
         ↑ Up
+      </button>
+
+      <button
+        onClick={onOpenUploadDialog}
+        style={{
+          padding: '4px 8px',
+          backgroundColor: '#28a745',
+          color: 'white',
+          border: '1px solid #28a745',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '12px'
+        }}
+      >
+        ⬆ Upload
       </button>
     </div>
   );

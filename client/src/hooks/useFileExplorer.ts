@@ -7,7 +7,7 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 export const useFileExplorer = () => {
   const [currentPath, setCurrentPath] = useState('');
   
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR(
     `/api/list?prefix=${encodeURIComponent(currentPath)}`,
     fetcher
   );
@@ -63,6 +63,7 @@ export const useFileExplorer = () => {
     navigateToFolder,
     navigateUp,
     navigateToBreadcrumb,
-    openFile
+    openFile,
+    refresh: () => mutate()
   };
 }; 

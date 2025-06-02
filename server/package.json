@@ -9,9 +9,11 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "@types/multer": "^1.4.12",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "multer": "^2.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
