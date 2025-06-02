@@ -1,6 +1,6 @@
-# GCS Client (local)
+# Google Cloud Storage GUI Client
 
-This project contains a lightweight Google Cloud Storage bucket explorer that you can run entirely on your laptop.
+This project contains a lightweight Google Cloud Storage bucket explorer that you can run entirely on your laptop (requires HMAC credentials, see in detail below).
 
 ## Features
 
