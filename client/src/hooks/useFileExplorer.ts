@@ -40,8 +40,19 @@ export const useFileExplorer = () => {
 
   const openFile = async (filePath: string) => {
     const res = await fetch(`/api/signed-url?file=${encodeURIComponent(filePath)}`);
-    const { url } = await res.json();
-    window.open(url, '_blank');
+    if (!res.ok) {
+      console.error('Failed to get signed URL:', res.status, res.statusText);
+      // Could add user notification here in the future
+      return;
+    }
+    
+    const data = await res.json();
+    if (!data.url) {
+      console.error('No URL returned from signed-url API');
+      return;
+    }
+    
+    window.open(data.url, '_blank');
   };
 
   return {

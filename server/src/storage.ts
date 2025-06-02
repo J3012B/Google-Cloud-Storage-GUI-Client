@@ -35,7 +35,7 @@ function createCanonicalRequest(method: string, uri: string, queryString: string
   
   const signedHeadersString = signedHeaders.map(h => h.toLowerCase()).join(';');
   
-  const payloadHash = headers['x-goog-content-sha256'] === 'UNSIGNED-PAYLOAD' 
+  const payloadHash = payload === 'UNSIGNED-PAYLOAD' 
     ? 'UNSIGNED-PAYLOAD' 
     : crypto.createHash('sha256').update(payload).digest('hex');
   
@@ -86,7 +86,7 @@ export const bucket = {
     
     const signedHeaders = ['host', 'x-goog-content-sha256', 'x-goog-date'];
     
-    const canonicalRequest = createCanonicalRequest(method, uri, queryString, headers, signedHeaders, '');
+    const canonicalRequest = createCanonicalRequest(method, uri, queryString, headers, signedHeaders, 'UNSIGNED-PAYLOAD');
     const canonicalRequestHash = crypto.createHash('sha256').update(canonicalRequest).digest('hex');
     
     const stringToSign = createStringToSign(algorithm, datetime, credentialScope, canonicalRequestHash);
@@ -134,25 +134,26 @@ export const bucket = {
         const credentialScope = `${date}/${region}/${service}/goog4_request`;
         
         const method = 'GET';
-        const uri = `/${encodeURIComponent(fileName)}`;
+        const uri = `/${fileName}`;
         const host = `${bucketName}.storage.googleapis.com`;
         
-        const queryParams = {
-          'X-Goog-Algorithm': algorithm,
-          'X-Goog-Credential': `${accessKey}/${credentialScope}`,
-          'X-Goog-Date': datetime,
-          'X-Goog-Expires': '900', // 15 minutes
-          'X-Goog-SignedHeaders': 'host'
-        };
+        const queryParams = [
+          ['X-Goog-Algorithm', algorithm],
+          ['X-Goog-Credential', `${accessKey}/${credentialScope}`],
+          ['X-Goog-Date', datetime],
+          ['X-Goog-Expires', '900'],
+          ['X-Goog-SignedHeaders', 'host']
+        ];
         
-        const queryString = Object.entries(queryParams)
+        queryParams.sort((a, b) => a[0].localeCompare(b[0]));
+        const queryString = queryParams
           .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
           .join('&');
         
         const headers = { 'host': host };
         const signedHeaders = ['host'];
         
-        const canonicalRequest = createCanonicalRequest(method, uri, queryString, headers, signedHeaders, '');
+        const canonicalRequest = createCanonicalRequest(method, uri, queryString, headers, signedHeaders, 'UNSIGNED-PAYLOAD');
         const canonicalRequestHash = crypto.createHash('sha256').update(canonicalRequest).digest('hex');
         
         const stringToSign = createStringToSign(algorithm, datetime, credentialScope, canonicalRequestHash);
@@ -160,7 +161,7 @@ export const bucket = {
         const signingKey = getSigningKey(secret, date, region, service);
         const signature = crypto.createHmac('sha256', signingKey).update(stringToSign).digest('hex');
         
-        const signedUrl = `https://${host}${uri}?${queryString}&X-Goog-Signature=${signature}`;
+        const signedUrl = `https://${host}${encodeURI(uri)}?${queryString}&X-Goog-Signature=${signature}`;
         
         return [signedUrl];
       }
