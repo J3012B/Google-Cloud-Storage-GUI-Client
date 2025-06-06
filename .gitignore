@@ -100,4 +100,6 @@ uploads/
 .vercel
 .netlify
 .firebase/
-.cache/ 
+.cache/
+
+# Electron build artifacts 

@@ -4,11 +4,10 @@ import dotenv from 'dotenv';
 import path from 'node:path';
 import multer from 'multer';
 import { bucket } from './storage.js';
-import { errorHandler } from './errorHandler.js';
 
 dotenv.config();
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 5173;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
 const app = express();
 
 // Configure multer for file uploads
@@ -20,7 +19,7 @@ app.use(express.json());
 // List files and directories under a prefix
 app.get(
   '/api/list',
-  errorHandler(async (req, res) => {
+  async (req, res) => {
     const prefix = ((req.query.prefix as string) || '').replace(/^\/+/, '');
 
     const [files] = await bucket.getFiles({ prefix });
@@ -45,14 +44,14 @@ app.get(
     }
 
     res.json({ prefixes: Array.from(directories), files: fileItems });
-  })
+  }
 );
 
 // Upload files directly through the server
 app.post(
   '/api/upload',
   upload.single('file'),
-  errorHandler(async (req, res) => {
+  async (req, res) => {
     const file = req.file;
     const filePath = req.body.filePath;
 
@@ -103,13 +102,13 @@ app.post(
         details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
-  })
+  }
 );
 
 // Get a signed URL for a single file
 app.get(
   '/api/signed-url',
-  errorHandler(async (req, res) => {
+  async (req, res) => {
     const filePath = (req.query.file as string) ?? '';
     if (!filePath) {
       return res.status(400).json({ error: 'file query parameter required' });
@@ -119,13 +118,13 @@ app.get(
       expires: Date.now() + 15 * 60 * 1000, // 15 minutes
     });
     res.json({ url });
-  })
+  }
 );
 
 // Get a signed URL for uploading a file (write access)
 app.get(
   '/api/signed-url-upload',
-  errorHandler(async (req, res) => {
+  async (req, res) => {
     const filePath = (req.query.file as string) ?? '';
     const contentType = (req.query.contentType as string) ?? 'application/octet-stream';
     
@@ -140,7 +139,7 @@ app.get(
       expires: Date.now() + 15 * 60 * 1000, // 15 minutes
     });
     res.json({ url });
-  })
+  }
 );
 
 // Basic health route
@@ -148,14 +147,16 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Serve static frontend build if available
-const clientBuild = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../client/dist');
-app.use(express.static(clientBuild));
-app.get('*', (_req, res) => {
-  res.sendFile(path.join(clientBuild, 'index.html'));
-});
+// Only serve static frontend build in production
+if (process.env.NODE_ENV === 'production') {
+  const clientBuild = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../client/dist');
+  app.use(express.static(clientBuild));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientBuild, 'index.html'));
+  });
+}
 
-app.use((err: any, _req: express.Request, res: express.Response) => {
+app.use((err: any, _req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err);
   res.status(500).json({ error: 'Internal Server Error' });
 });

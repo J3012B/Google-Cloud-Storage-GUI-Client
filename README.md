@@ -61,10 +61,3 @@ cd client && npm run build        # build the React app into client/dist
 cd ../server && npm run build     # compile TypeScript
 node dist/server.js               # serve API & static UI from the same port (5173)
 ```
-
----
-### Error handling
-
-Per project conventions **`try/catch` blocks are avoided** – instead we use
-`errorHandler()` (see `server/src/errorHandler.ts`) to wrap every async route
-and let Express deal with unexpected errors gracefully. 

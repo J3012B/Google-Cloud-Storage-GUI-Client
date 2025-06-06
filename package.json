@@ -1,0 +1,51 @@
+{
+  "name": "gcs-client-desktop",
+  "version": "1.0.0",
+  "description": "GCS Client Desktop Application",
+  "main": "electron.js",
+  "scripts": {
+    "electron": "electron .",
+    "electron-dev": "concurrently \"npm run server:dev\" \"npm run client:dev\" \"wait-on http://localhost:5173 http://localhost:3001 && NODE_ENV=development electron .\"",
+    "build": "npm run client:build && npm run server:build",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "client:dev": "cd client && npm run dev",
+    "client:build": "cd client && npm run build",
+    "server:dev": "cd server && npm run dev",
+    "server:build": "cd server && npm run build"
+  },
+  "build": {
+    "appId": "com.yourcompany.gcs-client",
+    "productName": "GCS Client",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron.js",
+      "client/dist/**/*",
+      "server/dist/**/*",
+      "server/node_modules/**/*",
+      "node_modules/**/*"
+    ],
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity"
+    },
+    "dmg": {
+      "title": "GCS Client",
+      "icon": false
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0",
+    "concurrently": "^8.0.0",
+    "wait-on": "^7.0.0"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.1",
+    "multer": "^2.0.0"
+  }
+} 
